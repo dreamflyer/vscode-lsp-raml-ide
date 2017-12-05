@@ -1,0 +1,70 @@
+{
+  "name": "api-workbench-vscode",
+  "description": "VSCode client for API Workbench server",
+  "author": "Mulesoft",
+  "publisher": "Mulesoft",
+  "version": "0.0.4",
+  "engines": {
+    "vscode": "^1.18.0"
+  },
+  "categories": [
+    "Languages", "Linters", "Themes"
+  ],
+  "activationEvents": [
+    "onLanguage:raml"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "API Workbench for VS Code configuration",
+      "properties": {
+        "languageServerExample.maxNumberOfProblems": {
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "languageServerExample.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VSCode and the languageServerExample service."
+        }        
+      }
+    },
+		"languages": [{
+			"id": "raml",
+			"aliases": ["RAML", "raml"],
+			"extensions": [".raml"],
+			"configuration": "./raml.configuration.json"
+		}],
+		"grammars": [{
+			"language": "raml",
+			"scopeName": "source.raml",
+			"path": "./syntaxes/raml.json"
+		}]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile && node ./node_modules/vscode/bin/test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^2.2.33",
+    "@types/node": "^6.0.52",
+    "@types/socket.io": "*",
+    "typescript": "^2.1.5",
+    "vscode": "^1.1.9"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^3.5.0",
+    "raml-language-server": "0.0.4",
+    "socket.io": "2.0.4"
+  }
+}
