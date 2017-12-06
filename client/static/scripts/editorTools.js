@@ -789,7 +789,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    var column = offset - (currentOffset - lineLength);
 	    return {
-	        lineNumber: i,
+	        lineNumber: i === 0 ? 0 : i - 1,
 	        column: column > 0 ? column : 0
 	    };
 	}
