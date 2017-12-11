@@ -1,10 +1,13 @@
 'use strict';
 import * as path from 'path';
 
-import { workspace, Disposable, ExtensionContext, window } from 'vscode';
+import { workspace, Disposable, ExtensionContext, window, commands } from 'vscode';
 import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
 
 import messages = require("./messages");
+import actions = require("./actions");
+
+import { Client } from '_debugger';
 
 export function activate(context: ExtensionContext) {
 	let serverModule = context.asAbsolutePath(path.join('node_modules', 'raml-language-server', 'dist', 'entryPoints', 'vscode', 'server.js'));
@@ -23,11 +26,13 @@ export function activate(context: ExtensionContext) {
 			fileEvents: workspace.createFileSystemWatcher('**/.clientrc')
 		}
 	}
-	
+
 	var client = new LanguageClient('languageServerExample', 'Language Server Example', serverOptions, clientOptions);
 
 	client.onReady().then(ready => {
-		messages.listen(client)
+		var ramlClient = messages.listen(client);
+
+		actions.init(ramlClient);
 	});
 
 	let disposable = client.start();
