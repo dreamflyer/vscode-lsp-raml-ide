@@ -30,7 +30,7 @@ export class RAMLMessageManager extends AbstractClientConnection {
     }
 }
 
-export function listen(vsClient: LanguageClient) {
+export function listen(vsClient: LanguageClient): RAMLMessageManager {
     var ramlClient = new RAMLMessageManager(vsClient);
 
     ramlClient.setLoggerConfiguration({
@@ -55,7 +55,7 @@ export function listen(vsClient: LanguageClient) {
 
     ramlClient.setServerConfiguration({
         actionsConfiguration: {
-            enableUIActions: false
+            enableUIActions: true
         },
 
         modulesConfiguration: {
@@ -63,9 +63,11 @@ export function listen(vsClient: LanguageClient) {
 
             enableEditorManagerModule: true,
             
-            enableCustomActionsModule: false
+            enableCustomActionsModule: true
         }
     });
+
+    return ramlClient;
 }
 
 function registerHandlers(view: htmlView.IHtmlView, ramlClient: RAMLMessageManager) {
