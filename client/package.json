@@ -74,15 +74,80 @@
       }
     ],
     
-    // "menus": {
-    //   "editor/context": [
-    //     {
-    //       "when": "ramlcontext.hello == true",
-    //       "command": "extension.hello",
-    //       "group": "navigation"
-    //     }
-    //   ]
-    // },
+    "menus": {
+      "editor/context": [
+        {
+          "when": "raml.action.commentnode.enabled == true",
+          "command": "raml.action.commentnode",
+          "group": "Code"
+        },
+        {
+          "when": "raml.action.deletenode.enabled == true",
+          "command": "raml.action.deletenode",
+          "group": "Code"
+        },
+        {
+          "when": "raml.action.expandtypetojsonschema.enabled == true",
+          "command": "raml.action.expandtypetojsonschema",
+          "group": "Refactoring"
+        },
+        {
+          "when": "raml.action.expandtypetojsonschemadefinition.enabled == true",
+          "command": "raml.action.expandtypetojsonschemadefinition",
+          "group": "Refactoring"
+        },
+        {
+          "when": "raml.action.completebody.enabled == true",
+          "command": "raml.action.completebody",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.newmethod.enabled == true",
+          "command": "raml.action.newmethod",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_body.enabled == true",
+          "command": "raml.action.create_new_body",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_header.enabled == true",
+          "command": "raml.action.create_new_header",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_property.enabled == true",
+          "command": "raml.action.create_new_property",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_query_parameter.enabled == true",
+          "command": "raml.action.create_new_query_parameter",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_response.enabled == true",
+          "command": "raml.action.create_new_response",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_response_body.enabled == true",
+          "command": "raml.action.create_new_response_body",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_response_header.enabled == true",
+          "command": "raml.action.create_new_response_header",
+          "group": "Add new..."
+        },
+        {
+          "when": "raml.action.create_new_uri_parameter.enabled == true",
+          "command": "raml.action.create_new_uri_parameter",
+          "group": "Add new..."
+        }
+      ]
+    },
     
     "configuration": {
       "type": "object",
