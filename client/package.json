@@ -15,6 +15,75 @@
   ],
   "main": "./out/src/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "raml.action.commentnode",
+        "title": "Comment node"
+      },
+      {
+        "command": "raml.action.deletenode",
+        "title": "Delete current node"
+      },
+      {
+        "command": "raml.action.expandtypetojsonschema",
+        "title": "Expand type to JSON schema"
+      },
+      {
+        "command": "raml.action.expandtypetojsonschemadefinition",
+        "title": "Expand type to JSON schema definition"
+      },
+      {
+        "command": "raml.action.completebody",
+        "title": "Complete body"
+      },
+      {
+        "command": "raml.action.newmethod",
+        "title": "New method"
+      },
+      {
+        "command": "raml.action.create_new_body",
+        "title": "Create new Body"
+      },
+      {
+        "command": "raml.action.create_new_header",
+        "title": "Create new Header"
+      },
+      {
+        "command": "raml.action.create_new_property",
+        "title": "Create new Property"
+      },
+      {
+        "command": "raml.action.create_new_query_parameter",
+        "title": "Create new Query Parameter"
+      },
+      {
+        "command": "raml.action.create_new_response",
+        "title": "Create new Response"
+      },
+      {
+        "command": "raml.action.create_new_response_body",
+        "title": "Create new Response Body"
+      },
+      {
+        "command": "raml.action.create_new_response_header",
+        "title": "Create new Response Header"
+      },
+      {
+        "command": "raml.action.create_new_uri_parameter",
+        "title": "Create new URI Parameter"
+      }
+    ],
+    
+    // "menus": {
+    //   "editor/context": [
+    //     {
+    //       "when": "ramlcontext.hello == true",
+    //       "command": "extension.hello",
+    //       "group": "navigation"
+    //     }
+    //   ]
+    // },
+    
     "configuration": {
       "type": "object",
       "title": "API Workbench for VS Code configuration",
