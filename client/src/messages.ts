@@ -8,6 +8,8 @@ import {AbstractClientConnection, textEditProcessor} from "raml-language-server"
 
 import { RequestType, ResponseType, EditorInfo, EditorPosition } from "./htmlEvents";
 
+import uiActions = require("./uiActions");
+
 export class RAMLMessageManager extends AbstractClientConnection {
     constructor(private vsClient: LanguageClient) {
         super("VSClientConnection");
@@ -103,9 +105,25 @@ function registerHandlers(view: htmlView.IHtmlView, ramlClient: RAMLMessageManag
     view.onData(RequestType.GET_LATEST_VERSION, (payload) => ramlClient.getLatestVersion(payload.data.uri).then(response => view.sendData(ResponseType.REQUESTED_LATEST_VERSION, {requestId: payload.requestId, payload: response})));
     view.onData(RequestType.GET_STRUCTURE, (payload) => ramlClient.getStructure(payload.data.uri).then(response => view.sendData(ResponseType.REQUESTED_STRUCTURE, {requestId: payload.requestId, payload: response})));
 
+    var uiPromiseResolve: any;
+
+    view.onData(RequestType.UI_RESPONSE, (data) => {
+        uiPromiseResolve(data);
+    });
+
     ramlClient.onDetailsReport(report => view.sendData(ResponseType.DETAILS_REPORT, report));
     
     ramlClient.onStructureReport(report => view.sendData(ResponseType.STRUCTURE_REPORT, report));
+
+    ramlClient.onDisplayActionUI(uiData => {
+        uiData.uiCode = uiActions.getUICode(uiData.action.id);
+
+        view.sendData(ResponseType.UI_DATA, uiData);
+
+        return new Promise(resolve => {
+            uiPromiseResolve = resolve;
+        });
+    });
 
     workspace.onDidChangeTextDocument(event => {
         if(!event.document.fileName.endsWith('.raml')) {

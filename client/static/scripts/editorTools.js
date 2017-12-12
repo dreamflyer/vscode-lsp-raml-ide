@@ -60,8 +60,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var editorConverter = __webpack_require__(16);
 	var atom_web_ui_1 = __webpack_require__(17);
 	var editorTools = __webpack_require__(38);
+	var uiDisplay = __webpack_require__(49);
 	var initialized = false;
 	ramlClientProxy.init();
+	uiDisplay.init();
 	ramlClientProxy.onEditorOpened(function (editor) {
 	    if (!initialized) {
 	        editorTools.initEditorTools(editor, true);
@@ -163,6 +165,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    socketConnection.setupHandler(interfaces_1.ResponseType.STRUCTURE_REPORT, callback);
 	}
 	exports.onStructureReport = onStructureReport;
+	function onDisplayUi(callback) {
+	    socketConnection.setupHandler(interfaces_1.ResponseType.UI_DATA, function (uiData) {
+	        var promise = callback(uiData);
+	        promise.then(function (uiResponse) {
+	            socketConnection.send(interfaces_1.RequestType.UI_RESPONSE, uiResponse);
+	        });
+	    });
+	}
+	exports.onDisplayUi = onDisplayUi;
 	function setContent(content) {
 	    socketConnection.send(interfaces_1.RequestType.SET_CONTENT, content);
 	}
@@ -298,6 +309,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    RequestType["GET_DETAILS"] = "getDetails";
 	    RequestType["GET_LATEST_VERSION"] = "getLatestVersion";
 	    RequestType["GET_STRUCTURE"] = "getStructure";
+	    RequestType["UI_RESPONSE"] = "uiResponse";
 	})(RequestType = exports.RequestType || (exports.RequestType = {}));
 	(function (RequestType) {
 	    function isWaitRequest(type) {
@@ -314,7 +326,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            RequestType.DOCUMENT_CHANGED,
 	            RequestType.GET_DETAILS,
 	            RequestType.GET_LATEST_VERSION,
-	            RequestType.GET_STRUCTURE
+	            RequestType.GET_STRUCTURE,
+	            RequestType.UI_RESPONSE
 	        ];
 	    }
 	    RequestType.values = values;
@@ -330,6 +343,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ResponseType["REQUESTED_STRUCTURE"] = "requestedLatestVersion";
 	    ResponseType["REQUESTED_DETAIL_VALUE"] = "requestedDetailValue";
 	    ResponseType["REQUESTED_OFFSET_UPDATE"] = "requestedGetSetContentAndOffset";
+	    ResponseType["UI_DATA"] = "uiData";
 	})(ResponseType = exports.ResponseType || (exports.ResponseType = {}));
 	(function (ResponseType) {
 	    function isOnRequest(type) {
@@ -346,7 +360,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ResponseType.REQUESTED_LATEST_VERSION,
 	            ResponseType.REQUESTED_STRUCTURE,
 	            ResponseType.REQUESTED_DETAIL_VALUE,
-	            ResponseType.REQUESTED_OFFSET_UPDATE
+	            ResponseType.REQUESTED_OFFSET_UPDATE,
+	            ResponseType.UI_DATA
 	        ];
 	    }
 	    ResponseType.values = values;
@@ -32980,6 +32995,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.get = get;
 	//# sourceMappingURL=logger.js.map
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var atom_web_ui_1 = __webpack_require__(17);
+	var ramlClientProxy = __webpack_require__(1);
+	var uiBuilder = __webpack_require__(44);
+	function init() {
+	    ramlClientProxy.onDisplayUi(function (displayData) {
+	        var exports = {};
+	        (function (exports, UI, IDE, UIBuilder) {
+	            eval(displayData.uiCode);
+	        }).apply({}, [exports, atom_web_ui_1.atomUiLib, atom_web_ui_1.atom, uiBuilder]);
+	        return exports.run(displayData.initialUIState);
+	    });
+	}
+	exports.init = init;
+	//# sourceMappingURL=uiDisplay.js.map
 
 /***/ })
 /******/ ])
