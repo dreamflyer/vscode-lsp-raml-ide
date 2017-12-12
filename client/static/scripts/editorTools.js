@@ -33011,10 +33011,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        (function (exports, UI, IDE, UIBuilder) {
 	            eval(displayData.uiCode);
 	        }).apply({}, [exports, atom_web_ui_1.atomUiLib, atom_web_ui_1.atom, uiBuilder]);
-	        return exports.run(displayData.initialUIState);
+	        switchVisibility(true);
+	        return exports.run(displayData.initialUIState).then(function (data) {
+	            switchVisibility(false);
+	            return data;
+	        });
 	    });
 	}
 	exports.init = init;
+	function switchVisibility(modal) {
+	    document.getElementById("modal-container").style.display = modal ? null : "none";
+	    document.getElementById("outline-container").style.display = modal ? "none" : null;
+	}
 	//# sourceMappingURL=uiDisplay.js.map
 
 /***/ })
