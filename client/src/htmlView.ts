@@ -58,7 +58,7 @@ export function createView(viewId: string, column: number, callback: (view: IHtm
 }
 
 function openPage(id: string, port: number, column: number, onDidOpen: () => void) {
-    //commands.executeCommand('vscode.previewHtml', 'htmlview:' + id, 3).then(status => onDidOpen());
+    commands.executeCommand('vscode.previewHtml', 'htmlview:' + id, 3).then(status => onDidOpen());
 }
 
 function registerHtmlProvider() {

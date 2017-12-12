@@ -4,6 +4,17 @@ import { window, TextEditor, Range, Position, Selection, TextDocument, workspace
 import { EditorRange, EditorInfo, EditorPosition } from './htmlEvents';
 import { fail } from 'assert';
 
+export class Change {
+    uri: string;
+
+    range?: {
+        start: number,
+        end: number
+    };
+
+    value: string;
+}
+
 export function setText(text: string, editor?: TextEditor, document?: TextDocument): Thenable<void> {
     editor = findEditor(editor, document);
     
@@ -28,6 +39,33 @@ export function setText(text: string, editor?: TextEditor, document?: TextDocume
             resolve();
         });
 	});
+}
+
+export function applyChanges(changes: Change[], editor?: TextEditor): Thenable<any> {
+    editor = findEditor(editor);
+    
+    return applyChange(findEditor(editor), 0, changes);
+}
+
+function applyChange(editor: TextEditor, index: number, changes: Change[]): Thenable<any> {
+    if(index > changes.length - 1) {
+        return;
+    }
+
+    var change = changes[index];
+
+    if(!change.range) {
+        return setText(change.value, editor).then(success => applyChange(editor, index + 1, changes));
+    }
+
+    var edit = new WorkspaceEdit();
+
+    var startPosition = editor.document.positionAt(change.range.start);
+    var endPosition = editor.document.positionAt(change.range.end);
+
+    edit.replace(editor.document.uri, new Range(startPosition, endPosition), change.value);
+
+    return workspace.applyEdit(edit).then(success => applyChange(editor, index + 1, changes));
 }
 
 function findEditor(editor?: TextEditor, document?: TextDocument) {
