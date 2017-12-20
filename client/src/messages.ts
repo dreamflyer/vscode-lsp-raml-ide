@@ -104,6 +104,8 @@ function registerHandlers(view: htmlView.IHtmlView, ramlClient: RAMLMessageManag
     view.onData(RequestType.GET_DETAILS, (payload) => ramlClient.getDetails(payload.data.uri, payload.data.position).then(response => view.sendData(ResponseType.REQUESTED_DETAILS_REPORT, {requestId: payload.requestId, payload: response})));
     view.onData(RequestType.GET_LATEST_VERSION, (payload) => ramlClient.getLatestVersion(payload.data.uri).then(response => view.sendData(ResponseType.REQUESTED_LATEST_VERSION, {requestId: payload.requestId, payload: response})));
     view.onData(RequestType.GET_STRUCTURE, (payload) => ramlClient.getStructure(payload.data.uri).then(response => view.sendData(ResponseType.REQUESTED_STRUCTURE, {requestId: payload.requestId, payload: response})));
+    view.onData(RequestType.EXECUTE_ACTION_BY_ID, (payload) => ramlClient.executeContextActionByID(payload.data.uri, payload.data.actionID, payload.data.position).then(response => view.sendData(ResponseType.REQUESTED_EXECUTE_ACTION_BY_ID, {requestId: payload.requestId, payload: response})));
+    view.onData(RequestType.EXECUTE_DETAILS_ACTION, (payload) => ramlClient.executeDetailsAction(payload.data.uri, payload.data.actionID, payload.data.position).then(response => view.sendData(ResponseType.REQUESTED_EXECUTE_DETAILS_ACTION, {requestId: payload.requestId, payload: response})));
 
     var uiPromiseResolve: any;
 

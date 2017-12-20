@@ -60,7 +60,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var editorConverter = __webpack_require__(16);
 	var atom_web_ui_1 = __webpack_require__(17);
 	var editorTools = __webpack_require__(38);
-	var uiDisplay = __webpack_require__(49);
+	var uiDisplay = __webpack_require__(50);
 	var initialized = false;
 	ramlClientProxy.init();
 	uiDisplay.init();
@@ -214,6 +214,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return socketConnection.send(interfaces_1.RequestType.GET_STRUCTURE, { uri: uri });
 	}
 	exports.getStructure = getStructure;
+	function executeContextActionByID(path, actionID, position) {
+	    return socketConnection.send(interfaces_1.RequestType.EXECUTE_ACTION_BY_ID, { uri: path, actionID: actionID, position: position });
+	}
+	exports.executeContextActionByID = executeContextActionByID;
+	function executeDetailsAction(path, actionID, position) {
+	    return socketConnection.send(interfaces_1.RequestType.EXECUTE_DETAILS_ACTION, { uri: path, actionID: actionID, position: position });
+	}
+	exports.executeDetailsAction = executeDetailsAction;
 	function documentClosed(uri) {
 	}
 	exports.documentClosed = documentClosed;
@@ -309,6 +317,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    RequestType["GET_DETAILS"] = "getDetails";
 	    RequestType["GET_LATEST_VERSION"] = "getLatestVersion";
 	    RequestType["GET_STRUCTURE"] = "getStructure";
+	    RequestType["EXECUTE_ACTION_BY_ID"] = "getExecuteContextActionByID";
+	    RequestType["EXECUTE_DETAILS_ACTION"] = "getExecuteDetailsAction";
 	    RequestType["UI_RESPONSE"] = "uiResponse";
 	})(RequestType = exports.RequestType || (exports.RequestType = {}));
 	(function (RequestType) {
@@ -327,6 +337,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            RequestType.GET_DETAILS,
 	            RequestType.GET_LATEST_VERSION,
 	            RequestType.GET_STRUCTURE,
+	            RequestType.EXECUTE_ACTION_BY_ID,
+	            RequestType.EXECUTE_DETAILS_ACTION,
 	            RequestType.UI_RESPONSE
 	        ];
 	    }
@@ -343,6 +355,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ResponseType["REQUESTED_STRUCTURE"] = "requestedLatestVersion";
 	    ResponseType["REQUESTED_DETAIL_VALUE"] = "requestedDetailValue";
 	    ResponseType["REQUESTED_OFFSET_UPDATE"] = "requestedGetSetContentAndOffset";
+	    ResponseType["REQUESTED_EXECUTE_ACTION_BY_ID"] = "requestedExecuteContextActionByID";
+	    ResponseType["REQUESTED_EXECUTE_DETAILS_ACTION"] = "requestedExecuteDetailsAction";
 	    ResponseType["UI_DATA"] = "uiData";
 	})(ResponseType = exports.ResponseType || (exports.ResponseType = {}));
 	(function (ResponseType) {
@@ -361,6 +375,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ResponseType.REQUESTED_STRUCTURE,
 	            ResponseType.REQUESTED_DETAIL_VALUE,
 	            ResponseType.REQUESTED_OFFSET_UPDATE,
+	            ResponseType.REQUESTED_EXECUTE_ACTION_BY_ID,
+	            ResponseType.REQUESTED_EXECUTE_DETAILS_ACTION,
 	            ResponseType.UI_DATA
 	        ];
 	    }
@@ -29458,9 +29474,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var markOccurrences = __webpack_require__(39);
 	var outlineView = __webpack_require__(40);
 	var detailsView = __webpack_require__(42);
-	var reconciler = __webpack_require__(47);
+	var reconciler = __webpack_require__(48);
 	var converter = __webpack_require__(16);
-	var logger = __webpack_require__(48);
+	var logger = __webpack_require__(49);
 	var ramlClientProxy = __webpack_require__(1);
 	var EditorManager = (function () {
 	    function EditorManager(display) {
@@ -30255,8 +30271,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var CompositeDisposable = atom_web_ui_1.atomUiLib.CompositeDisposable;
 	var details = __webpack_require__(43);
 	var editorTools = __webpack_require__(38);
-	var reconciler_1 = __webpack_require__(47);
-	var logger = __webpack_require__(48);
+	var reconciler_1 = __webpack_require__(48);
+	var logger = __webpack_require__(49);
 	var ramlClientProxy = __webpack_require__(1);
 	var RamlDetails = (function (_super) {
 	    __extends(RamlDetails, _super);
@@ -30477,6 +30493,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _ = __webpack_require__(45);
 	var atom_web_ui_1 = __webpack_require__(17);
 	var assistUtils = __webpack_require__(46);
+	var assist_utils_1 = __webpack_require__(46);
+	var actions_1 = __webpack_require__(47);
 	var ramlClientProxy = __webpack_require__(1);
 	var lastSelectedCaption;
 	var inRender = false;
@@ -30701,7 +30719,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var TopLevelNode = (function (_super) {
 	    __extends(TopLevelNode, _super);
 	    function TopLevelNode(detailsNode, context) {
-	        var _this = _super.call(this, detailsNode.title, detailsNode.description) || this;
+	        var _this = _super.call(this, detailsNode ? detailsNode.title : "API", detailsNode ? detailsNode.description : "") || this;
 	        _this.detailsNode = detailsNode;
 	        _this.context = context;
 	        _this.ep = null;
@@ -31146,73 +31164,179 @@ return /******/ (function(modules) { // webpackBootstrap
 	    };
 	    return LowLevelTreeField;
 	}(PropertyEditorInfo));
+	var ActionsItem = (function (_super) {
+	    __extends(ActionsItem, _super);
+	    function ActionsItem(context) {
+	        var _this = _super.call(this, "Actions", "") || this;
+	        _this.context = context;
+	        _this.nodes = [];
+	        return _this;
+	    }
+	    ActionsItem.prototype.addNode = function (node) {
+	        this.nodes.push(node);
+	    };
+	    ActionsItem.prototype.render = function (r) {
+	        var _this = this;
+	        var result = atom_web_ui_1.atomUiLib.vc();
+	        var hc = atom_web_ui_1.atomUiLib.hc();
+	        result.addChild(atom_web_ui_1.atomUiLib.h3("Insertions and Delete: "));
+	        result.addChild(hc);
+	        this.nodes.forEach(function (node) {
+	            if (node.subType == "INSERT") {
+	                hc.addChild(atom_web_ui_1.atomUiLib.button(node.title, atom_web_ui_1.atomUiLib.ButtonSizes.EXTRA_SMALL, atom_web_ui_1.atomUiLib.ButtonHighlights.INFO, atom_web_ui_1.atomUiLib.Icon.NONE, function (x) {
+	                    _this.run(node.id);
+	                }).margin(3, 3, 3, 3));
+	            }
+	        });
+	        this.nodes.forEach(function (node) {
+	            if (node.subType == "INSERT_VALUE") {
+	                hc.addChild(atom_web_ui_1.atomUiLib.button(node.title, atom_web_ui_1.atomUiLib.ButtonSizes.EXTRA_SMALL, atom_web_ui_1.atomUiLib.ButtonHighlights.WARNING, atom_web_ui_1.atomUiLib.Icon.NONE, function (x) {
+	                    _this.run(node.id);
+	                }).margin(3, 3, 3, 3));
+	            }
+	        });
+	        this.nodes.forEach(function (node) {
+	            if (node.subType == "DELETE") {
+	                hc.addChild(atom_web_ui_1.atomUiLib.button(node.title, atom_web_ui_1.atomUiLib.ButtonSizes.EXTRA_SMALL, atom_web_ui_1.atomUiLib.ButtonHighlights.ERROR, atom_web_ui_1.atomUiLib.Icon.NONE, function (x) {
+	                    _this.run(node.id);
+	                }).margin(3, 3, 3, 3));
+	            }
+	        });
+	        return result;
+	    };
+	    ActionsItem.prototype.run = function (actionID) {
+	        ramlClientProxy.executeDetailsAction(this.context.uri, actionID, this.context.position).then((function (changedDocuments) {
+	            assist_utils_1.applyChangedDocuments(changedDocuments);
+	        }));
+	    };
+	    ActionsItem.prototype.dispose = function () {
+	    };
+	    return ActionsItem;
+	}(Item));
+	function isInstanceOfActionsItem(item) {
+	    return item.addNode != null;
+	}
+	var CustomActionsItem = (function (_super) {
+	    __extends(CustomActionsItem, _super);
+	    function CustomActionsItem(context) {
+	        var _this = _super.call(this, "Actions", "") || this;
+	        _this.context = context;
+	        _this.nodes = [];
+	        return _this;
+	    }
+	    CustomActionsItem.prototype.addAction = function (node) {
+	        this.nodes.push(node);
+	    };
+	    CustomActionsItem.prototype.render = function (r) {
+	        var _this = this;
+	        var result = atom_web_ui_1.atomUiLib.vc();
+	        var hc = atom_web_ui_1.atomUiLib.hc();
+	        result.addChild(atom_web_ui_1.atomUiLib.h3("Custom Actions: "));
+	        result.addChild(hc);
+	        this.nodes.forEach(function (node) {
+	            hc.addChild(atom_web_ui_1.atomUiLib.button(node.title, atom_web_ui_1.atomUiLib.ButtonSizes.EXTRA_SMALL, atom_web_ui_1.atomUiLib.ButtonHighlights.INFO, atom_web_ui_1.atomUiLib.Icon.NONE, function (x) {
+	                _this.run(node.id);
+	            }).margin(3, 3, 3, 3));
+	        });
+	        return result;
+	    };
+	    CustomActionsItem.prototype.run = function (actionID) {
+	        actions_1.launchServerActionByID(this.context.uri, actionID, this.context.position);
+	    };
+	    CustomActionsItem.prototype.dispose = function () {
+	    };
+	    return CustomActionsItem;
+	}(Item));
+	function isInstanceOfCustomActionsItem(item) {
+	    return item.addAction != null;
+	}
 	function buildItem(detailsNode, context, dialog) {
 	    var root = new TopLevelNode(detailsNode, context);
-	    if (detailsNode.children) {
-	        for (var _i = 0, _a = detailsNode.children; _i < _a.length; _i++) {
-	            var child = _a[_i];
-	            if (child.type == "CATEGORY") {
-	                var categoryName = child.title;
-	                if (child.children) {
-	                    for (var _b = 0, _c = child.children; _b < _c.length; _b++) {
-	                        var childOfChild = _c[_b];
-	                        buildItemInCategory(childOfChild, root, categoryName, context);
+	    try {
+	        if (detailsNode && detailsNode.children) {
+	            for (var _i = 0, _a = detailsNode.children; _i < _a.length; _i++) {
+	                var child = _a[_i];
+	                if (child.type == "CATEGORY") {
+	                    var categoryName = child.title;
+	                    if (child.children) {
+	                        for (var _b = 0, _c = child.children; _b < _c.length; _b++) {
+	                            var childOfChild = _c[_b];
+	                            buildItemInCategory(childOfChild, root, categoryName, context);
+	                        }
 	                    }
 	                }
-	            }
-	            else {
-	                buildItemInCategory(child, root, null, context);
+	                else {
+	                    buildItemInCategory(child, root, null, context);
+	                }
 	            }
 	        }
+	    }
+	    catch (error) {
+	        console.log(error);
 	    }
 	    return root;
 	}
 	exports.buildItem = buildItem;
 	function buildItemInCategory(detailsNode, root, categoryName, context) {
 	    var item = null;
-	    if (detailsNode.type == "CHECKBOX") {
-	        item = new CheckBoxField(detailsNode, context);
+	    try {
+	        if (detailsNode.type == "CHECKBOX") {
+	            item = new CheckBoxField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "JSONSCHEMA"
+	            && detailsNode.valueText !== null) {
+	            item = new JSONSchemaField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "XMLSCHEMA"
+	            && detailsNode.valueText !== null) {
+	            item = new XMLSchemaField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "MARKDOWN") {
+	            item = new MarkdownField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "SELECTBOX"
+	            && detailsNode.options !== null) {
+	            item = new SelectBox(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "MULTIEDITOR") {
+	            item = new SimpleMultiEditor(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "TREE") {
+	            item = new LowLevelTreeField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "STRUCTURED") {
+	            item = new StructuredField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "TYPEDISPLAY") {
+	            item = new TypeDisplayItem(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "TYPESELECT") {
+	            item = new TypeSelectBox(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "JSONEXAMPLE"
+	            && detailsNode.valueText !== null) {
+	            item = new ExampleField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "XMLEXAMPLE"
+	            && detailsNode.valueText !== null) {
+	            item = new XMLExampleField(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "ATTRIBUTETEXT") {
+	            item = new PropertyEditorInfo(detailsNode, context);
+	        }
+	        else if (detailsNode.type == "DETAILS_ACTION") {
+	            if ((detailsNode).subType != "CUSTOM_ACTION") {
+	                var actionItem = findOrCreateActionItemInCategory(root, categoryName, context);
+	                actionItem.addNode(detailsNode);
+	            }
+	            else {
+	                var customActionItem = findOrCreateCustomActionItemInCategory(root, categoryName, context);
+	                customActionItem.addAction(detailsNode);
+	            }
+	        }
 	    }
-	    else if (detailsNode.type == "JSONSCHEMA"
-	        && detailsNode.valueText !== null) {
-	        item = new JSONSchemaField(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "XMLSCHEMA"
-	        && detailsNode.valueText !== null) {
-	        item = new XMLSchemaField(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "MARKDOWN") {
-	        item = new MarkdownField(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "SELECTBOX"
-	        && detailsNode.options !== null) {
-	        item = new SelectBox(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "MULTIEDITOR") {
-	        item = new SimpleMultiEditor(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "TREE") {
-	        item = new LowLevelTreeField(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "STRUCTURED") {
-	        item = new StructuredField(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "TYPEDISPLAY") {
-	        item = new TypeDisplayItem(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "TYPESELECT") {
-	        item = new TypeSelectBox(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "JSONEXAMPLE"
-	        && detailsNode.valueText !== null) {
-	        item = new ExampleField(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "XMLEXAMPLE"
-	        && detailsNode.valueText !== null) {
-	        item = new XMLExampleField(detailsNode, context);
-	    }
-	    else if (detailsNode.type == "ATTRIBUTETEXT") {
-	        item = new PropertyEditorInfo(detailsNode, context);
+	    catch (error) {
+	        console.log(error);
 	    }
 	    if (item != null) {
 	        root.addItemToCategory(categoryName, item);
@@ -31220,6 +31344,46 @@ return /******/ (function(modules) { // webpackBootstrap
 	    else {
 	        console.log("Can not recognize element " + detailsNode.type);
 	    }
+	}
+	function findOrCreateActionItemInCategory(root, categoryName, context) {
+	    var category = root.subCategoryByNameOrCreate(categoryName);
+	    for (var _i = 0, _a = category.children(); _i < _a.length; _i++) {
+	        var child = _a[_i];
+	        if (isInstanceOfActionsItem(child)) {
+	            return child;
+	        }
+	    }
+	    var actionsItem = new ActionsItem(context);
+	    category.children().unshift(actionsItem);
+	    return actionsItem;
+	}
+	function findActionItemInCategory(root, categoryName, context) {
+	    var category = root.subCategoryByNameOrCreate(categoryName);
+	    for (var _i = 0, _a = category.children(); _i < _a.length; _i++) {
+	        var child = _a[_i];
+	        if (isInstanceOfActionsItem(child)) {
+	            return child;
+	        }
+	    }
+	    return null;
+	}
+	function findOrCreateCustomActionItemInCategory(root, categoryName, context) {
+	    var category = root.subCategoryByNameOrCreate(categoryName);
+	    for (var _i = 0, _a = category.children(); _i < _a.length; _i++) {
+	        var child = _a[_i];
+	        if (isInstanceOfCustomActionsItem(child)) {
+	            return child;
+	        }
+	    }
+	    var customActionsItem = new CustomActionsItem(context);
+	    var inserterActionsItem = findActionItemInCategory(root, categoryName, context);
+	    if (inserterActionsItem) {
+	        category.children().splice(1, 0, customActionsItem);
+	    }
+	    else {
+	        category.children().unshift(customActionsItem);
+	    }
+	    return customActionsItem;
 	}
 	//# sourceMappingURL=detailElements.js.map
 
@@ -32801,15 +32965,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return editorTools.aquireManager().getCurrentEditor();
 	    return null;
 	}
-	function gotoPosition(position) {
-	    var activeEditor = getActiveEditor();
-	    if (!activeEditor) {
-	        return;
-	    }
-	    var bufferPos = activeEditor.getBuffer().positionForCharacterIndex(position);
-	    activeEditor.setSelectedBufferRange({ start: bufferPos, end: bufferPos }, {});
-	}
-	exports.gotoPosition = gotoPosition;
 	function applyChangedDocuments(changedDocuments) {
 	    for (var _i = 0, changedDocuments_1 = changedDocuments; _i < changedDocuments_1.length; _i++) {
 	        var changedDocument = changedDocuments_1[_i];
@@ -32855,10 +33010,63 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 	exports.applyChangedDocumentsAsync = applyChangedDocumentsAsync;
+	function gotoPosition(position) {
+	    var activeEditor = getActiveEditor();
+	    if (!activeEditor) {
+	        return;
+	    }
+	    var bufferPos = activeEditor.getBuffer().positionForCharacterIndex(position);
+	    activeEditor.setSelectedBufferRange({ start: bufferPos, end: bufferPos }, {});
+	}
+	exports.gotoPosition = gotoPosition;
 	//# sourceMappingURL=assist-utils.js.map
 
 /***/ }),
 /* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var ramlClientProxy = __webpack_require__(1);
+	var atom_web_ui_1 = __webpack_require__(17);
+	var editorTools = __webpack_require__(38);
+	function launchServerActionByID(path, actionID, position) {
+	    ramlClientProxy.executeContextActionByID(path, actionID, position).then(function (changes) {
+	        var editorManager = editorTools.aquireManager();
+	        if (!editorManager)
+	            return Promise.resolve([]);
+	        var path = editorManager.getPath();
+	        var _loop_1 = function (change) {
+	            if (change.uri == path && change.text != null) {
+	                editorManager.getCurrentEditor().getBuffer().setText(change.text);
+	                ramlClientProxy.documentChanged({
+	                    uri: path,
+	                    text: change.text
+	                });
+	            }
+	            else if (change.text != null) {
+	                var editorFound_1 = false;
+	                atom_web_ui_1.atom.workspace.getTextEditors().forEach(function (currentEditor) {
+	                    if (currentEditor.getPath && currentEditor.getPath() == change.uri) {
+	                        currentEditor.getBuffer().setText(change.text);
+	                        editorFound_1 = true;
+	                    }
+	                });
+	                if (!editorFound_1) {
+	                }
+	            }
+	        };
+	        for (var _i = 0, changes_1 = changes; _i < changes_1.length; _i++) {
+	            var change = changes_1[_i];
+	            _loop_1(change);
+	        }
+	    });
+	}
+	exports.launchServerActionByID = launchServerActionByID;
+	//# sourceMappingURL=actions.js.map
+
+/***/ }),
+/* 48 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -32957,7 +33165,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//# sourceMappingURL=reconciler.js.map
 
 /***/ }),
-/* 48 */
+/* 49 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -32997,7 +33205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	//# sourceMappingURL=logger.js.map
 
 /***/ }),
-/* 49 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
