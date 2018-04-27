@@ -73,7 +73,6 @@
         "title": "Create new URI Parameter"
       }
     ],
-    
     "menus": {
       "editor/context": [
         {
@@ -175,11 +174,20 @@
 			"aliases": ["RAML", "raml"],
 			"extensions": [".raml"],
 			"configuration": "./raml.configuration.json"
+		}, {
+			"id": "sjson",
+			"aliases": ["SJSON", "sjson"],
+			"extensions": [".sjson"],
+			"configuration": "./sjson.configuration.json"
 		}],
 		"grammars": [{
 			"language": "raml",
 			"scopeName": "source.raml",
 			"path": "./syntaxes/raml.json"
+		}, {
+			"language": "sjson",
+			"scopeName": "source.sjson",
+			"path": "./syntaxes/sjson.json"
 		}]
   },
   "scripts": {

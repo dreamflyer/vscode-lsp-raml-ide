@@ -1,0 +1,57 @@
+[
+	{
+		"scope": "sjson.string",
+		
+		"settings": {
+			"foreground": "#00CC66"
+		}
+	},
+	
+	{
+		"scope": "sjson.key sjson.string",
+		
+		"settings": {
+			"foreground": "#A65926"
+		}
+	},
+
+	{
+		"scope": "sjson.path",
+		
+		"settings": {
+			"foreground": "#00B7FF"
+		}
+	},
+
+	{
+		"scope": "sjson.key sjson.path",
+		
+		"settings": {
+			"foreground": "#00FF00"
+		}
+	},
+
+	{
+		"scope": "sjson.key sjson.response",
+		
+		"settings": {
+			"foreground": "#0000FF"
+		}
+	},
+
+	{
+		"scope": "sjson.key sjson.refstring",
+		
+		"settings": {
+			"foreground": "#FF00FF"
+		}
+	},
+
+	{
+		"scope": "sjson.key sjson.method",
+		
+		"settings": {
+			"foreground": "#CC9900"
+		}
+	}
+]

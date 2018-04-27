@@ -1,5 +1,6 @@
 'use strict';
-import * as path from 'path';
+import path = require("path");
+import fs = require("fs");
 
 import { workspace, Disposable, ExtensionContext, window, commands } from 'vscode';
 import { LanguageClient, LanguageClientOptions, SettingMonitor, ServerOptions, TransportKind } from 'vscode-languageclient';
@@ -9,10 +10,18 @@ import actions = require("./actions");
 
 import { Client } from '_debugger';
 
+var swaggerColorsMap = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../static/sjsonMap.json")).toString());
+
 export function activate(context: ExtensionContext) {
 	let serverModule = context.asAbsolutePath(path.join('node_modules', 'raml-language-server', 'dist', 'entryPoints', 'vscode', 'server.js'));
 	let debugOptions = { execArgv: ["--nolazy", "--debug=6009"] };
-	
+
+	var editorSettings = workspace.getConfiguration("editor");
+
+	editorSettings.update("tokenColorCustomizations", {
+		textMateRules: swaggerColorsMap
+	});
+	  	
 	let serverOptions: ServerOptions = {
 		run : { module: serverModule, transport: TransportKind.ipc },
 		debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions }
