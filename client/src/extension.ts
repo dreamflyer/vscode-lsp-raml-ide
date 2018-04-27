@@ -10,7 +10,8 @@ import actions = require("./actions");
 
 import { Client } from '_debugger';
 
-var swaggerColorsMap = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../static/sjsonMap.json")).toString());
+var swaggerJsonColorsMap: any[] = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../static/sjsonMap.json")).toString());
+var swaggerYamlColorsMap: any[] = JSON.parse(fs.readFileSync(path.resolve(__dirname, "../../static/syamlMap.json")).toString());
 
 export function activate(context: ExtensionContext) {
 	let serverModule = context.asAbsolutePath(path.join('node_modules', 'raml-language-server', 'dist', 'entryPoints', 'vscode', 'server.js'));
@@ -19,7 +20,7 @@ export function activate(context: ExtensionContext) {
 	var editorSettings = workspace.getConfiguration("editor");
 
 	editorSettings.update("tokenColorCustomizations", {
-		textMateRules: swaggerColorsMap
+		textMateRules: swaggerJsonColorsMap.concat(swaggerYamlColorsMap)
 	});
 	  	
 	let serverOptions: ServerOptions = {

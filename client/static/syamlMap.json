@@ -1,0 +1,32 @@
+[
+	{
+		"scope": "meta.reference",
+		
+		"settings": {
+			"foreground": "#FF00FF"
+		}
+	},
+
+	{
+		"scope": "meta.response",
+		
+		"settings": {
+			"foreground": "#0000FF"
+		}
+	},
+	{
+		"scope": "meta.resource",
+		
+		"settings": {
+			"foreground": "#00FF00"
+		}
+	},
+
+	{
+		"scope": "meta.method",
+		
+		"settings": {
+			"foreground": "#CC9900"
+		}
+	}
+]

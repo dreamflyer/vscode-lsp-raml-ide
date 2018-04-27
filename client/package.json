@@ -179,6 +179,11 @@
 			"aliases": ["SJSON", "sjson"],
 			"extensions": [".sjson"],
 			"configuration": "./sjson.configuration.json"
+		}, {
+			"id": "syaml",
+			"aliases": ["SYAML", "syaml"],
+			"extensions": [".syaml"],
+			"configuration": "./syaml.configuration.json"
 		}],
 		"grammars": [{
 			"language": "raml",
@@ -188,6 +193,10 @@
 			"language": "sjson",
 			"scopeName": "source.sjson",
 			"path": "./syntaxes/sjson.json"
+    }, {
+			"language": "syaml",
+			"scopeName": "source.syaml",
+			"path": "./syntaxes/syaml.json"
 		}]
   },
   "scripts": {
